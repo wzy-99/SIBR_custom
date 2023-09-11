@@ -629,7 +629,7 @@ namespace sibr
 		_gl.dirtyBufferGL = true;
 		return true;
 	}
-	
+
 	bool	Mesh::loadSfM(const std::string& filename, const std::string& dataset_path )
 	{
 		// Does the file exist?

@@ -102,11 +102,6 @@ int main(int ac, char** av)
 	GaussianAppArgs myArgs;
 	myArgs.displayHelpIfRequired();
 	
-	if(!myArgs.modelPath.isInit() && myArgs.modelPathShort.isInit())
-		myArgs.modelPath = myArgs.modelPathShort.get();
-	if(!myArgs.dataset_path.isInit() && myArgs.pathShort.isInit())
-		myArgs.dataset_path = myArgs.pathShort.get();
-
 	int device = myArgs.device;
 
 	// rendering size
@@ -116,8 +111,6 @@ int main(int ac, char** av)
 	// window size
 	uint win_width = rendering_width; // myArgs.win_width;
 	uint win_height = rendering_height; // myArgs.win_height;
-
-	const char* toload = myArgs.modelPath.get().c_str();
 
 	// Window setup
 	sibr::Window		window(PROGRAM_NAME, sibr::Vector2i(50, 50), myArgs, getResourcesDirectory() + "/gaussians/" + PROGRAM_NAME + ".ini");
@@ -133,58 +126,21 @@ int main(int ac, char** av)
 	ImGui::GetCurrentContext()->SettingsHandlers.push_back(ini_handler);
 	window.loadSettings();
 
-	std::string cfgLine;
-	std::ifstream cfgFile(myArgs.modelPath.get() + "/cfg_args");
-	if (!cfgFile.good())
-	{
-		SIBR_ERR << "Could not find config file 'cfg_args' at " << myArgs.modelPath.get();
-	}
-	std::getline(cfgFile, cfgLine);
-
-	if (!myArgs.dataset_path.isInit())
-	{
-		auto rng = findArg(cfgLine, "source_path");
-		myArgs.dataset_path = cfgLine.substr(rng.first + 1, rng.second - rng.first - 2);
-	}
-
-	auto rng = findArg(cfgLine, "sh_degree");
-	int sh_degree = std::stoi(cfgLine.substr(rng.first, rng.second - rng.first));
-
-	rng = findArg(cfgLine, "white_background");
-	bool white_background = cfgLine.substr(rng.first, rng.second - rng.first).find("True") != -1;
+	int sh_degree = myArgs.shDegree.get();
+	bool white_background = myArgs.whiteBackground.get();
 
 	BasicIBRScene::SceneOptions myOpts;
-	myOpts.renderTargets = myArgs.loadImages;
-	myOpts.mesh = true;
-	myOpts.images = myArgs.loadImages;
+	myOpts.mesh = false;
+	myOpts.images = false;
 	myOpts.cameras = true;
 	myOpts.texture = false;
+	myOpts.renderTargets = false;
 
 	BasicIBRScene::Ptr scene;
-	try
-	{
-		scene.reset(new BasicIBRScene(myArgs, myOpts));
-	}
-	catch (...)
-	{
-		SIBR_LOG << "Did not find specified input folder, loading from model path" << std::endl;
-		myArgs.dataset_path = myArgs.modelPath.get();
-		scene.reset(new BasicIBRScene(myArgs, myOpts));
-	}
+	scene.reset(new BasicIBRScene(myArgs, myOpts));
 
-	std::string plyfile = myArgs.modelPath.get();
-	if (plyfile.back() != '/')
-		plyfile += "/";
-	plyfile += "point_cloud";
-	if (!myArgs.iteration.isInit())
-	{
-		plyfile += "/" + findLargestNumberedSubdirectory(plyfile) + "/point_cloud.ply";
-	}
-	else
-	{
-		plyfile += "/iteration_" + myArgs.iteration.get() + "/point_cloud.ply";
-	}
-
+	std::string plyfile = myArgs.plyPath.get();
+	
 	// Setup the scene: load the proxy, create the texture arrays.
 	const uint flags = SIBR_GPU_LINEAR_SAMPLING | SIBR_FLIP_TEXTURE;
 
@@ -217,7 +173,7 @@ int main(int ac, char** av)
 	// Raycaster.
 	std::shared_ptr<sibr::Raycaster> raycaster = std::make_shared<sibr::Raycaster>();
 	raycaster->init();
-	raycaster->addMesh(scene->proxies()->proxy());
+	raycaster->addMesh(new Mesh());
 
 	// Camera handler for main view.
 	sibr::InteractiveCameraHandler::Ptr generalCamera(new InteractiveCameraHandler());
@@ -232,11 +188,11 @@ int main(int ac, char** av)
 	multiViewManager.addIBRSubView("Point view", gaussianView, usedResolution, ImGuiWindowFlags_ResizeFromAnySide | ImGuiWindowFlags_NoBringToFrontOnFocus);
 	multiViewManager.addCameraForView("Point view", generalCamera);
 
-	// Top view
-	const std::shared_ptr<sibr::SceneDebugView> topView(new sibr::SceneDebugView(scene, generalCamera, myArgs));
-	multiViewManager.addSubView("Top view", topView, usedResolution);
-	CHECK_GL_ERROR;
-	topView->active(false);
+	// // Top view
+	// const std::shared_ptr<sibr::SceneDebugView> topView(new sibr::SceneDebugView(scene, generalCamera, myArgs));
+	// multiViewManager.addSubView("Top view", topView, usedResolution);
+	// CHECK_GL_ERROR;
+	// topView->active(false);
 
 	// save images
 	generalCamera->getCameraRecorder().setViewPath(gaussianView, myArgs.dataset_path.get());

@@ -1510,6 +1510,33 @@ namespace sibr
 		return cameras;
 	}
 
+	std::vector<InputCamera::Ptr> InputCamera::loadDefault(const float zNear, const float zFar)
+	{
+		std::vector<InputCamera::Ptr> cameras;
+
+		int id = 0;
+		int width = 800;
+		int height = 800;
+		float fy = 3.14 / 2;
+		float fx = 3.14 / 2;
+
+		sibr::InputCamera::Ptr camera = std::make_shared<InputCamera>(InputCamera(fy, fx, 0.0f, 0.0f, width, height, id));
+
+		sibr::Vector3f position(0.0, 0.0, 0.0);
+
+		sibr::Matrix3f orientation;
+		orientation = sibr::Matrix3f::Identity();
+
+		camera->name("default camera");
+		camera->position(position);
+		camera->rotation(sibr::Quaternionf(orientation));
+		camera->znear(zNear);
+		camera->zfar(zFar);
+		cameras.push_back(camera);
+
+		return cameras;
+	}
+
 	std::vector<InputCamera::Ptr> InputCamera::loadTransform(const std::string& transformPath, int w, int h, std::string extension, const float zNear, const float zFar, const int offset, const int fovXfovYFlag)
 	{
 		std::ifstream json_file(transformPath, std::ios::in);
@@ -1572,6 +1599,4 @@ namespace sibr
 		}
 		return cameras;
 	}
-
-
 } 

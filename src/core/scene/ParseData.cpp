@@ -273,6 +273,15 @@ namespace sibr {
 		_meshPath = dataset_path + "/input.ply";
 	}
 
+	void ParseData::getParsedJsonData(const std::string& dataset_path)
+	{
+		_camInfos = InputCamera::loadJSON(dataset_path + "/cameras.json");
+	}
+
+	void ParseData::getParsedDefaultData() {
+		_camInfos = InputCamera::loadDefault();
+	}
+
 	void ParseData::getParsedColmap2Data(const std::string& dataset_path, const int fovXfovY_flag, const bool capreal_flag)
 	{
 		_basePathName = dataset_path + "/sparse/0/";
@@ -469,6 +478,7 @@ namespace sibr {
 		std::string chunked = myArgs.dataset_path.get() + "/chunk.dat";
 		std::string blender = myArgs.dataset_path.get() + "/transforms_train.json";
 		std::string gaussian = myArgs.dataset_path.get() + "/cameras.json";
+		std::string json = myArgs.dataset_path.get() + "/cameras.json";
 
 		if(datasetTypeStr == "sibr") {
 			if (!sibr::fileExists(bundler))
@@ -521,9 +531,20 @@ namespace sibr {
 		{
 			if (!sibr::fileExists(gaussian))
 				SIBR_ERR << "Cannot use dataset_type " + myArgs.dataset_type.get() + " at /" + myArgs.dataset_path.get() + "." << std::endl
-				<< "Reason : Gaussian transform (" << blender << ") does not exist" << std::endl;
+				<< "Reason : Gaussian transform (" << gaussian << ") does not exist" << std::endl;
 
-			_datasetType = Type::BLENDER;
+			_datasetType = Type::GAUSSIAN;
+		}
+		else if (datasetTypeStr == "json")
+		{
+			if (!sibr::fileExists(json))
+				SIBR_ERR << "Cannot use dataset_type " + myArgs.dataset_type.get() + " at /" + myArgs.dataset_path.get() + "." << std::endl
+				<< "Reason : json transform (" << json << ") does not exist" << std::endl;
+
+			_datasetType = Type::JSON;
+		}
+		else if (datasetTypeStr == "default") {
+			_datasetType = Type::DEFAULT;
 		}
 		else {
 			if (sibr::fileExists(bundler)) {
@@ -562,7 +583,9 @@ namespace sibr {
 		}
 
 		switch(_datasetType) {
-			case Type::GAUSSIAN:			getParsedGaussianData(myArgs.dataset_path); break;
+			case Type::GAUSSIAN:		getParsedGaussianData(myArgs.dataset_path); break;
+			case Type::JSON:			getParsedJsonData(myArgs.dataset_path); break;
+			case Type::DEFAULT:			getParsedDefaultData(); break;
 			case Type::BLENDER:			getParsedBlenderData(myArgs.dataset_path); break;
 			case Type::SIBR : 			getParsedBundlerData(myArgs.dataset_path, customPath, myArgs.scene_metadata_filename); break;
 			case Type::COLMAP_CAPREAL : getParsedColmapData(myArgs.dataset_path, myArgs.colmap_fovXfovY_flag, true); break;

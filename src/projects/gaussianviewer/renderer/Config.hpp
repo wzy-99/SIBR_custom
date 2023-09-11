@@ -42,12 +42,10 @@ namespace sibr {
 	/// Arguments for all ULR applications.
 	struct GaussianAppArgs :
 		virtual BasicIBRAppArgs {
-		RequiredArg<std::string> modelPath = { "model-path", "Model directory" };
-		RequiredArg<std::string> modelPathShort = { "m", "Model directory" };
-		RequiredArg<std::string> iteration = { "iteration", "Iteration to load from model" };
-		RequiredArg<std::string> pathShort = {"s", "path to the dataset root"};
+		RequiredArg<std::string> plyPath = {"p", "path to the ply file"};
+		Arg<int> shDegree = {"d", 3, "degree of the spherical harmonics"};
+		Arg<bool> whiteBackground = {"white_background", "white background"};
 		Arg<int> device = {"device", 0, "CUDA device index"};
-		Arg<bool> loadImages = { "load_images", "Whether or not to load images for scene overview."};
 		Arg<bool> noInterop = { "no_interop", "Don't try to use interop (may be required for unconventional OpenGL setups, like WSL)" };
 	};
 
