@@ -89,6 +89,7 @@ namespace sibr {
 		bool _doRotScalePython = false;
 		bool _keepAlive = true;
 		bool _showSfM = false;
+		float _t = 0.0;
 
 		float _scalingModifier = 1.0f;
 
