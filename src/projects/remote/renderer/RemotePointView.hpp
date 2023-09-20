@@ -89,6 +89,11 @@ namespace sibr {
 		bool _doRotScalePython = false;
 		bool _keepAlive = true;
 		bool _showSfM = false;
+		bool _showFeatures = false;
+		bool _showRGB = true;
+		bool _showGray = false;
+
+		uint32_t _featureChannel = 0;
 
 		float _scalingModifier = 1.0f;
 

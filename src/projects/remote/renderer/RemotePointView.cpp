@@ -27,6 +27,10 @@ constexpr char* jScalingModifier = "scaling_modifier";
 constexpr char* jSHsPython = "shs_python";
 constexpr char* jRotScalePython = "rot_scale_python";
 constexpr char* jKeepAlive = "keep_alive";
+constexpr char* jShowFeatures = "show_features";
+constexpr char* jShowRGB = "show_rgb";
+constexpr char* jShowGray = "show_gray";
+constexpr char* jFeatureChannel = "feature_channel";
 
 void sibr::RemotePointView::send_receive()
 {
@@ -68,6 +72,10 @@ void sibr::RemotePointView::send_receive()
 					sendData[jKeepAlive] = _keepAlive ? 1 : 0;
 					sendData[jViewMat] = std::vector<float>((float*)&_remoteInfo.view, ((float*)&_remoteInfo.view) + 16);
 					sendData[jViewProjMat] = std::vector<float>((float*)&_remoteInfo.viewProj, ((float*)&_remoteInfo.viewProj) + 16);
+					sendData[jShowFeatures] = _showFeatures ? 1 : 0;
+					sendData[jShowRGB] = _showRGB ? 1 : 0;
+					sendData[jShowGray] = _showGray ? 1 : 0;
+					sendData[jFeatureChannel] = _featureChannel;
 
 					std::string message = sendData.dump();
 					uint32_t messageLength = message.size();
@@ -189,12 +197,16 @@ void sibr::RemotePointView::onGUI()
 	const std::string guiName = "Remote Viewer Settings (" + name() + ")";
 	if (ImGui::Begin(guiName.c_str())) 
 	{
-		ImGui::Checkbox("Show Input Points", &_showSfM);
-		ImGui::Checkbox("Show Input Points during Motion", &_renderSfMInMotion);
+		// ImGui::Checkbox("Show Input Points", &_showSfM);
+		// ImGui::Checkbox("Show Input Points during Motion", &_renderSfMInMotion);
 		ImGui::Checkbox("Train", &_doTrainingBool);
 		ImGui::Checkbox("SHs Python", &_doSHsPython);
 		ImGui::Checkbox("Rot-Scale Python", &_doRotScalePython);
 		ImGui::Checkbox("Keep model alive (after training)", &_keepAlive);
+		ImGui::Checkbox("Show Features", &_showFeatures);
+		ImGui::Checkbox("Show RGB", &_showRGB);
+		ImGui::Checkbox("Show Gray", &_showGray);
+		ImGui::SliderInt("Feature Channel", (int*)&_featureChannel, 0, 2);
 		ImGui::SliderFloat("Scaling Modifier", &_scalingModifier, 0.001f, 1.0f);
 	}
 	ImGui::End();
