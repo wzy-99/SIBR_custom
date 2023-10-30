@@ -1535,8 +1535,6 @@ namespace sibr
 
 		for (int i = 0; i < frames.size(); i++)
 		{
-			std::string imgname = frames[i].get("file_path").get<std::string>() + "." + extension;
-
 			auto mat = frames[i].get("transform_matrix").get<picojson::array>();
 
 			Eigen::Matrix4f matrix;
@@ -1563,7 +1561,7 @@ namespace sibr
 				camera = std::make_shared<InputCamera>(InputCamera(focalx, 0.0f, 0.0f, int(w), int(h), i + offset));
 			}
 
-			camera->name(imgname);
+			camera->name("");
 			camera->position(T);
 			camera->rotation(sibr::Quaternionf(R));
 			camera->znear(zNear);

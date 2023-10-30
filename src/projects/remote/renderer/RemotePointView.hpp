@@ -91,6 +91,10 @@ namespace sibr {
 		bool _showSfM = false;
 
 		float _scalingModifier = 1.0f;
+		int _indexModifier = 1.0f;
+		float _eyeModifier = 1.0f;
+		int _cameraLength = 10000;
+		bool _doPlay = false;
 
 		std::atomic<bool> keep_running{true};
 

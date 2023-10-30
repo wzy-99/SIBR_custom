@@ -27,6 +27,9 @@ constexpr char* jScalingModifier = "scaling_modifier";
 constexpr char* jSHsPython = "shs_python";
 constexpr char* jRotScalePython = "rot_scale_python";
 constexpr char* jKeepAlive = "keep_alive";
+constexpr char* jIndex = "index";
+constexpr char* jEye = "eye";
+constexpr char* jPlay = "play";
 
 void sibr::RemotePointView::send_receive()
 {
@@ -68,6 +71,9 @@ void sibr::RemotePointView::send_receive()
 					sendData[jKeepAlive] = _keepAlive ? 1 : 0;
 					sendData[jViewMat] = std::vector<float>((float*)&_remoteInfo.view, ((float*)&_remoteInfo.view) + 16);
 					sendData[jViewProjMat] = std::vector<float>((float*)&_remoteInfo.viewProj, ((float*)&_remoteInfo.viewProj) + 16);
+					sendData[jIndex] = _indexModifier;
+					sendData[jEye] = _eyeModifier;
+					sendData[jPlay] = _doPlay ? 1 : 0;
 
 					std::string message = sendData.dump();
 					uint32_t messageLength = message.size();
@@ -130,6 +136,7 @@ void sibr::RemotePointView::setScene(const sibr::BasicIBRScene::Ptr & newScene) 
 		}
 	}
 	_scene->cameras()->debugFlagCameraAsUsed(imgs_ulr);
+	_cameraLength = _scene->cameras()->inputCameras().size();
 }
 
 void sibr::RemotePointView::onRenderIBR(sibr::IRenderTarget & dst, const sibr::Camera & eye)
@@ -189,13 +196,17 @@ void sibr::RemotePointView::onGUI()
 	const std::string guiName = "Remote Viewer Settings (" + name() + ")";
 	if (ImGui::Begin(guiName.c_str())) 
 	{
-		ImGui::Checkbox("Show Input Points", &_showSfM);
-		ImGui::Checkbox("Show Input Points during Motion", &_renderSfMInMotion);
+		// ImGui::Checkbox("Show Input Points", &_showSfM);
+		// ImGui::Checkbox("Show Input Points during Motion", &_renderSfMInMotion);
 		ImGui::Checkbox("Train", &_doTrainingBool);
-		ImGui::Checkbox("SHs Python", &_doSHsPython);
-		ImGui::Checkbox("Rot-Scale Python", &_doRotScalePython);
+		// ImGui::Checkbox("SHs Python", &_doSHsPython);
+		// ImGui::Checkbox("Rot-Scale Python", &_doRotScalePython);
 		ImGui::Checkbox("Keep model alive (after training)", &_keepAlive);
 		ImGui::SliderFloat("Scaling Modifier", &_scalingModifier, 0.001f, 1.0f);
+		ImGui::SliderInt("Index", &_indexModifier, 0, _cameraLength);
+		ImGui::SliderFloat("Eye", &_eyeModifier, 0.001f, 1.0f);
+		ImGui::Checkbox("Play", &_doPlay);
+		// ImGui::InputInt("Index", &_indexModifier, 1.0f);
 	}
 	ImGui::End();
 }
